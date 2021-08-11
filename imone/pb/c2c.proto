@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+
+option go_package="./pb";
+
+package pb;
+
+
+//
+message C2CSendRequest {
+  string from =1;//发送者
+  string to =2;//目标者
+  string content =3;//消息内容
+}
+message C2CSendResponse {
+  int64 msgid =1;//落地存储的消息id
+  int64 timestamp =2;//收到单聊消息的时间戳
+}
+
+message C2CPushRequest {
+  string from =1;//发送者
+  string content =2 ;//消息内容
+  int64 msgid =3;//消息服务器对消息的编号
+  int64 timestamp =4;//收到单聊消息的时间戳
+
+}
+
+message C2CPushResponse {
+  int64 msgid =1;//消息服务器对消息的编号
+  string errMsg = 2;
+}
+
+// 查询用户是否在线，在线则返回详细信息
+message QueryUsersOnlineReq {
+  string userId = 1; // 用户ID
+}
+
+message QueryUsersOnlineRsp {
+  string errMsg = 1;
+  bool online = 2;
+  string address =3;//用户所在服务器
+}
+
+service IMService {
+  rpc SendMsg(C2CSendRequest)returns(C2CSendResponse){}
+
+  rpc PushMsg(C2CPushRequest)returns(C2CPushResponse){}
+
+  rpc QueryUserOnline(QueryUsersOnlineReq)returns(QueryUsersOnlineRsp){}
+}

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option go_package="./pb";
+
+package pb;
+
+message MsgPoint{
+  string AddressIp =1;
+  int64 From =2;
+  int64 To =3;
+  string Msg =4;
+  string SendTime =5;
+}
+
+message WriteStreamRequest{
+  MsgPoint MP =1;
+}
+
+message WriteStreamResponse{
+  string Err=1;
+  int64 Code =2;
+}
+
+//message ReadStreamRequest{
+//  string Err=1;
+//  int64 Code =2;
+//}
+//
+//
+//message ReadStreamResponse{
+//  MsgPoint MP =1;
+//}
+
+
+
+
+service StreamService{
+  rpc WriteStream(stream WriteStreamRequest)returns(stream WriteStreamResponse){}
+  //rpc ReadStream(stream ReadStreamRequest)returns(stream ReadStreamResponse){}
+}
+

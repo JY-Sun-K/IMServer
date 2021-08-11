@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+option go_package="./pb";
+
+package pb;
+
+message LoginRequest{
+  string Email=1;
+  string Password=2;
+}
+
+message LoginResponse{
+  int64 UserId =1;
+  string UserName=2;
+  string Email=3;
+  string Err=4;
+  int64 Code=5;
+  string Token=6;
+}
+
+
+message RegisterRequest{
+  string UserName =1;
+  string Email =2;
+  string Password=3;
+}
+
+message RegisterResponse{
+  int64 UserId =1;
+  string UserName=2;
+  string Email=3;
+  string Err=4;
+  int64 Code=5;
+  string Token=6;
+}
+
+message User{
+  int64 UserId =1;
+  string UserName=2;
+  string Email=3;
+  string Password=4;
+}
+
+message UserInfo{
+  int64 UserId =1;
+  string UserName=2;
+  string Email=3;
+
+}
+
+message GetUserInfoRequest{
+  string Email =1;
+  string Token =2;
+}
+
+message GetUserInfoResponse{
+  int64 UserId =1;
+  string UserName=2;
+  string Email=3;
+  map<int64,string> Friends =4;
+  string Err=5;
+  int64 Code=6;
+}
+
+
+message SearchUserRequest{
+  string UserName =1;
+}
+
+message SearchUserInfo{
+  int64 UserId=1;
+  string UserName=2;
+}
+
+message SearchUserResponse{
+  repeated SearchUserInfo SearchUsers=1;
+}
+
+message AddUserRequest{
+  int64 UserId =1;
+}
+
+message AddUserResponse{
+  string Err=1;
+  int64 Code=2;
+}
+
+
+message Msg{
+  string AddressIp =1;
+  int64 From =2;
+  int64 To =3;
+  string Msg =4;
+  string SendTime =5;
+}
+
+message SendMsgRequest{
+  Msg MP =1;
+}
+
+message SendMsgResponse{
+  string Err=1;
+  int64 Code =2;
+}
+
+message ReceiveMsgRequest{
+  Msg MP =1;
+}
+
+message ReceiveResponse{
+  string Err=1;
+  int64 Code =2;
+}
+
+
+
+
+
+
+
+
+service UserService{
+  rpc Login(LoginRequest)returns(LoginResponse){}
+  rpc Register(RegisterRequest)returns(RegisterResponse){}
+
+  rpc GetUserInfo(GetUserInfoRequest)returns(GetUserInfoResponse){}
+  rpc SearchUser(SearchUserRequest)returns(SearchUserResponse){}
+  rpc AddUser(AddUserRequest)returns(AddUserResponse){}
+  //web->this server
+  rpc SendMsg(SendMsgRequest)returns(SendMsgResponse){}
+  //imServer -> this server
+  rpc ReceiveMsg(ReceiveMsgRequest)returns(ReceiveResponse){}
+}
