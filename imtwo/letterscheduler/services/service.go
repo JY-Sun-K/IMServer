@@ -5,7 +5,7 @@ import (
 	"imdemo/imtwo/letterscheduler/pb"
 	"imdemo/imtwo/letterscheduler/timeline"
 	"io"
-
+	"log"
 )
 
 type StreamService struct {
@@ -16,6 +16,7 @@ func (s *StreamService)WriteStream(stream pb.StreamService_WriteStreamServer) er
 	for  {
 
 		r,err:=stream.Recv()
+		log.Println("WriteStream Receive:",r)
 		l:=&timeline.Letter{
 			IPAddress: r.MP.AddressIp,
 			From:      r.MP.From,

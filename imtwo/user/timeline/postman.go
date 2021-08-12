@@ -1,16 +1,17 @@
 package timeline
 
 import (
+	"imdemo/imtwo/user/dao"
 	"log"
 	"math/rand"
 )
 
-var Users =make(map[int64]*TimeLine)
+//var Users =make(map[int64]*TimeLine)
 var ErrChan =make(chan string,1000)
-
-func AddUser(id int64,timeline *TimeLine) {
-	Users[id]=timeline
-}
+//
+//func AddUser(id int64,timeline *TimeLine) {
+//	Users[id]=timeline
+//}
 
 
 type ReceiveScheduler struct {
@@ -71,7 +72,7 @@ func (w *WriteScheduler) Run() {
 func (r *ReceiveScheduler)Run()  {
 	for  {
 		msg := <-r.AcceptChan
-		timeline:=IsExist(msg.To)
+		timeline:=dao.RD.IsExist(msg.To)
 		switch  {
 		case timeline==nil:
 			ErrChan<- "没有该用户"
@@ -85,12 +86,12 @@ func (r *ReceiveScheduler)Run()  {
 }
 
 
-//key userid value user of timeline
-func IsExist(userID int64) *TimeLine {
-	timeline,ok:=Users[userID]
-	if !ok {
-		return nil
-	}
-	return timeline
-}
+////key userid value user of timeline
+//func IsExist(userID int64) *TimeLine {
+//	timeline,ok:=Users[userID]
+//	if !ok {
+//		return nil
+//	}
+//	return timeline
+//}
 

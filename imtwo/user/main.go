@@ -11,6 +11,10 @@ import (
 
 func main() {
 	err:= dao.InitDB()
+	dao.InitRedis()
+	services.InitReceiveWS()
+	go dao.RD.GetUsers()
+	go services.InitWriteChan()
 	if err != nil {
 		panic(err)
 	}

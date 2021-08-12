@@ -17,6 +17,19 @@ var WS *timeline.WriteScheduler
 func InitWriteChan() error {
 	writeChan := make(chan *protocol.Letter,1000)
 	WriteChan=writeChan
+	conn, err := grpc.Dial(":"+"8888", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("grpc.Dial err: %v", err)
+	}
+
+
+	client:=pb.NewStreamServiceClient(conn)
+	stream, err := client.WriteStream(context.Background())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	defer stream.CloseSend()
 	for  {
 		msg:=<-WriteChan
 		mp:=&pb.MsgPoint{
@@ -27,18 +40,19 @@ func InitWriteChan() error {
 			SendTime:  time.Now().String(),
 		}
 		r:=&pb.WriteStreamRequest{MP: mp}
-		conn, err := grpc.Dial(":"+"8888", grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("grpc.Dial err: %v", err)
-		}
+		//conn, err := grpc.Dial(":"+"8888", grpc.WithInsecure())
+		//if err != nil {
+		//	log.Fatalf("grpc.Dial err: %v", err)
+		//}
+		//
+		//
+		//client:=pb.NewStreamServiceClient(conn)
+		//stream, err := client.WriteStream(context.Background())
+		//if err != nil {
+		//	return err
+		//}
 
-
-		client:=pb.NewStreamServiceClient(conn)
-		stream, err := client.WriteStream(context.Background())
-		if err != nil {
-			return err
-		}
-		for  {
+			log.Println("send message:",r)
 			err = stream.Send(r)
 			if err != nil {
 				return err
@@ -51,9 +65,10 @@ func InitWriteChan() error {
 			if err != nil {
 				return err
 			}
-		}
-		stream.CloseSend()
-		conn.Close()
+			//stream.CloseSend()
+
+
+		//conn.Close()
 	}
 
 	return nil

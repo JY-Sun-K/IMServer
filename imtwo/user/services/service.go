@@ -8,6 +8,7 @@ import (
 	"imdemo/imtwo/user/protocol"
 	"imdemo/imtwo/user/timeline"
 	"imdemo/imtwo/user/utils"
+	"log"
 )
 
 type UserService struct {
@@ -45,7 +46,7 @@ func(s *UserService) Login(ctx context.Context,r *pb.LoginRequest) (*pb.LoginRes
 	}
 
 	user:=timeline.MakeTimeLine(userInfo.UserId)
-	dao.AddUser(userInfo.UserId,user)
+	dao.RD.AddUser(userInfo.UserId,user)
 	token:= utils.CreateToken(userInfo.UserId)
 	return &pb.LoginResponse{
 		UserId:   userInfo.UserId,
@@ -196,6 +197,7 @@ func (s *UserService) ReceiveMsg(ctx context.Context,r *pb.ReceiveMsgRequest) (*
 		SendTime:  r.MP.SendTime,
 	}
 	WS.WriteChan<-l
+	log.Println("receive msg:",l)
 	return &pb.ReceiveResponse{
 		Err:  "",
 		Code: 200,
