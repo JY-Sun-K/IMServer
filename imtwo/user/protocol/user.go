@@ -36,6 +36,11 @@ type Letter struct {
 	SendTime string //发送时间
 }
 
-type Msg struct {
 
+
+//每个人所有的一个Timeline
+type TimeLine struct {
+	Owner int64
+	InBox chan *Letter
 }
+

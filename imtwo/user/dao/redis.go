@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"imdemo/imtwo/user/timeline"
+	"imdemo/imtwo/user/protocol"
 	"log"
 	"time"
 )
@@ -9,16 +9,16 @@ import (
 var RD UsersRedis
 
 type UsersRedis interface {
-	AddUser(id int64,timeline *timeline.TimeLine)
+	AddUser(id int64,timeline *protocol.TimeLine)
 	GetUsers()
-	IsExist(userID int64) *timeline.TimeLine
+	IsExist(userID int64) *protocol.TimeLine
 }
 
 type UsersRedisImpl struct {
-	Users map[int64]*timeline.TimeLine
+	Users map[int64]*protocol.TimeLine
 }
 
-func (u *UsersRedisImpl)AddUser(id int64,timeline *timeline.TimeLine) {
+func (u *UsersRedisImpl)AddUser(id int64,timeline *protocol.TimeLine) {
 	u.Users[id]=timeline
 }
 
@@ -33,7 +33,7 @@ func (u *UsersRedisImpl)GetUsers()  {
 }
 
 //key userid value user of timeline
-func (u *UsersRedisImpl)IsExist(userID int64) *timeline.TimeLine {
+func (u *UsersRedisImpl)IsExist(userID int64) *protocol.TimeLine {
 	timeline,ok:=u.Users[userID]
 	if !ok {
 		return nil
@@ -42,5 +42,5 @@ func (u *UsersRedisImpl)IsExist(userID int64) *timeline.TimeLine {
 }
 
 func InitRedis() {
-	RD= &UsersRedisImpl{Users: make(map[int64]*timeline.TimeLine)}
+	RD= &UsersRedisImpl{Users: make(map[int64]*protocol.TimeLine)}
 }

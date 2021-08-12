@@ -189,7 +189,7 @@ func (s *UserService) SendMsg(ctx context.Context,r *pb.SendMsgRequest) (*pb.Sen
 }
 
 func (s *UserService) ReceiveMsg(ctx context.Context,r *pb.ReceiveMsgRequest) (*pb.ReceiveResponse, error) {
-	l:=&timeline.Letter{
+	l:=&protocol.Letter{
 		IPAddress: r.MP.AddressIp,
 		From:      r.MP.From,
 		To:        r.MP.To,
@@ -202,4 +202,30 @@ func (s *UserService) ReceiveMsg(ctx context.Context,r *pb.ReceiveMsgRequest) (*
 		Err:  "",
 		Code: 200,
 	},nil
+}
+
+func (s *UserService) AcceptMsg(r *pb.AcceptMsgRequest,stream pb.UserService_AcceptMsgServer) error {
+	for  {
+
+		user:=dao.RD.IsExist(r.UserId)
+		select {
+		case msg:=<-user.InBox:
+			
+			err := stream.Send(&pb.AcceptMsgResponse{MP: &pb.Msg{
+				AddressIp: msg.IPAddress,
+				From:      msg.From,
+				To:        msg.To,
+				Msg:       msg.Message,
+				SendTime:  msg.SendTime,
+			}})
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+
+
 }

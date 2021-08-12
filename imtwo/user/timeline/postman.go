@@ -2,6 +2,7 @@ package timeline
 
 import (
 	"imdemo/imtwo/user/dao"
+	"imdemo/imtwo/user/protocol"
 	"log"
 	"math/rand"
 )
@@ -16,12 +17,12 @@ var ErrChan =make(chan string,1000)
 
 type ReceiveScheduler struct {
 	ChanId int //以便于扩建,多个消费者
-	AcceptChan chan *Letter//接受信件
+	AcceptChan chan *protocol.Letter//接受信件
 
 }
 
 type WriteScheduler struct {
-	WriteChan chan *Letter
+	WriteChan chan *protocol.Letter
 	AccChannels []*ReceiveScheduler
 
 }
@@ -41,14 +42,14 @@ func MakeWriteScheduler(nums int) *WriteScheduler {
 		log.Println("add ReceiveScheduler")
 		go r.Run()
 	}
-	return &WriteScheduler{AccChannels: rs,WriteChan: make(chan *Letter,1000)}
+	return &WriteScheduler{AccChannels: rs,WriteChan: make(chan *protocol.Letter,1000)}
 }
 
 func MakeReceiveScheduler(id int)*ReceiveScheduler  {
 	log.Println("init ReceiveScheduler")
 	return &ReceiveScheduler{
 		ChanId:     id,
-		AcceptChan: make(chan *Letter,1000),
+		AcceptChan: make(chan *protocol.Letter,1000),
 	}
 
 }
@@ -78,6 +79,7 @@ func (r *ReceiveScheduler)Run()  {
 			ErrChan<- "没有该用户"
 		case timeline!=nil:
 			timeline.InBox<- msg
+			log.Println("send msg to :",timeline.Owner)
 		//case : 错误处理
 
 

@@ -112,7 +112,15 @@ message ReceiveResponse{
   int64 Code =2;
 }
 
+message AcceptMsgRequest{
+  int64 UserId=1;
+}
 
+message AcceptMsgResponse{
+  Msg MP=1;
+  string Err=2;
+  int64 Code=3;
+}
 
 
 
@@ -132,4 +140,7 @@ service UserService{
   rpc SendMsg(SendMsgRequest)returns(SendMsgResponse){}
   //imServer -> this server
   rpc ReceiveMsg(ReceiveMsgRequest)returns(ReceiveResponse){}
+
+  //this server ->web
+  rpc AcceptMsg(AcceptMsgRequest)returns(stream AcceptMsgResponse){}
 }

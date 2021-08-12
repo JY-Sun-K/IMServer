@@ -27,6 +27,8 @@ type UserServiceClient interface {
 	SendMsg(ctx context.Context, in *SendMsgRequest, opts ...grpc.CallOption) (*SendMsgResponse, error)
 	//imServer -> this server
 	ReceiveMsg(ctx context.Context, in *ReceiveMsgRequest, opts ...grpc.CallOption) (*ReceiveResponse, error)
+	//this server ->web
+	AcceptMsg(ctx context.Context, in *AcceptMsgRequest, opts ...grpc.CallOption) (UserService_AcceptMsgClient, error)
 }
 
 type userServiceClient struct {
@@ -100,6 +102,38 @@ func (c *userServiceClient) ReceiveMsg(ctx context.Context, in *ReceiveMsgReques
 	return out, nil
 }
 
+func (c *userServiceClient) AcceptMsg(ctx context.Context, in *AcceptMsgRequest, opts ...grpc.CallOption) (UserService_AcceptMsgClient, error) {
+	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], "/pb.UserService/AcceptMsg", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &userServiceAcceptMsgClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type UserService_AcceptMsgClient interface {
+	Recv() (*AcceptMsgResponse, error)
+	grpc.ClientStream
+}
+
+type userServiceAcceptMsgClient struct {
+	grpc.ClientStream
+}
+
+func (x *userServiceAcceptMsgClient) Recv() (*AcceptMsgResponse, error) {
+	m := new(AcceptMsgResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -113,6 +147,8 @@ type UserServiceServer interface {
 	SendMsg(context.Context, *SendMsgRequest) (*SendMsgResponse, error)
 	//imServer -> this server
 	ReceiveMsg(context.Context, *ReceiveMsgRequest) (*ReceiveResponse, error)
+	//this server ->web
+	AcceptMsg(*AcceptMsgRequest, UserService_AcceptMsgServer) error
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -140,6 +176,9 @@ func (UnimplementedUserServiceServer) SendMsg(context.Context, *SendMsgRequest) 
 }
 func (UnimplementedUserServiceServer) ReceiveMsg(context.Context, *ReceiveMsgRequest) (*ReceiveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReceiveMsg not implemented")
+}
+func (UnimplementedUserServiceServer) AcceptMsg(*AcceptMsgRequest, UserService_AcceptMsgServer) error {
+	return status.Errorf(codes.Unimplemented, "method AcceptMsg not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -280,6 +319,27 @@ func _UserService_ReceiveMsg_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_AcceptMsg_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(AcceptMsgRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(UserServiceServer).AcceptMsg(m, &userServiceAcceptMsgServer{stream})
+}
+
+type UserService_AcceptMsgServer interface {
+	Send(*AcceptMsgResponse) error
+	grpc.ServerStream
+}
+
+type userServiceAcceptMsgServer struct {
+	grpc.ServerStream
+}
+
+func (x *userServiceAcceptMsgServer) Send(m *AcceptMsgResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +376,12 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_ReceiveMsg_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "AcceptMsg",
+			Handler:       _UserService_AcceptMsg_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "user.proto",
 }
